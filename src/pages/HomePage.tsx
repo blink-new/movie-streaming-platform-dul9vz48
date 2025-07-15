@@ -1,27 +1,21 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { createClient } from '@blinkdotnew/sdk'
-import { Play, Info, Search, Menu, User, LogOut } from 'lucide-react'
+import { Play, Info } from 'lucide-react'
 import { Button } from '../components/ui/button'
-import { Input } from '../components/ui/input'
 import ContentCarousel from '../components/ContentCarousel'
 import Navigation from '../components/Navigation'
 
 const blink = createClient({
   projectId: 'movie-streaming-platform-dul9vz48',
-  authRequired: true
+  authRequired: false
 })
 
-interface HomePageProps {
-  user: any
-}
-
-export default function HomePage({ user }: HomePageProps) {
+export default function HomePage() {
   const [movies, setMovies] = useState([])
   const [tvShows, setTvShows] = useState([])
   const [featuredContent, setFeaturedContent] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     loadContent()
@@ -50,18 +44,10 @@ export default function HomePage({ user }: HomePageProps) {
     }
   }
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchQuery.trim()) {
-      // Navigate to search results
-      window.location.href = `/browse/search?q=${encodeURIComponent(searchQuery)}`
-    }
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Navigation user={user} />
+        <Navigation />
         <div className="flex items-center justify-center h-96">
           <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
         </div>
@@ -71,7 +57,7 @@ export default function HomePage({ user }: HomePageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation user={user} />
+      <Navigation />
       
       {/* Hero Section */}
       {featuredContent && (

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@blinkdotnew/sdk'
-import { Plus, Edit, Trash2, Film, Tv, Users, BarChart3, Upload } from 'lucide-react'
+import { Plus, Edit, Trash2, Film, Tv, BarChart3, Lock } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Textarea } from '../components/ui/textarea'
@@ -12,16 +12,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Badge } from '../components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
 import { toast } from 'sonner'
-import Navigation from '../components/Navigation'
 
 const blink = createClient({
   projectId: 'movie-streaming-platform-dul9vz48',
-  authRequired: true
+  authRequired: false
 })
-
-interface AdminDashboardProps {
-  user: any
-}
 
 interface ContentItem {
   id: string
@@ -37,10 +32,12 @@ interface ContentItem {
   createdAt: string
 }
 
-export default function AdminDashboard({ user }: AdminDashboardProps) {
+export default function AdminDashboard() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [password, setPassword] = useState('')
   const [movies, setMovies] = useState<ContentItem[]>([])
   const [tvShows, setTvShows] = useState<ContentItem[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<ContentItem | null>(null)
   const [activeTab, setActiveTab] = useState('overview')
@@ -59,11 +56,37 @@ export default function AdminDashboard({ user }: AdminDashboardProps) {
     type: 'movie' as 'movie' | 'tv_show'
   })
 
+  // Check if already authenticated on mount
   useEffect(() => {
-    loadContent()
+    const savedAuth = localStorage.getItem('admin_authenticated')
+    if (savedAuth === 'true') {
+      setIsAuthenticated(true)
+      loadContent()
+    }
   }, [])
 
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Simple password check - you can change this password
+    if (password === 'admin123') {
+      setIsAuthenticated(true)
+      localStorage.setItem('admin_authenticated', 'true')
+      loadContent()
+      toast.success('Access granted!')
+    } else {
+      toast.error('Invalid password')
+      setPassword('')
+    }
+  }
+
+  const handleLogout = () => {
+    setIsAuthenticated(false)
+    localStorage.removeItem('admin_authenticated')
+    setPassword('')
+  }
+
   const loadContent = async () => {
+    setLoading(true)
     try {
       const [moviesData, tvShowsData] = await Promise.all([
         blink.db.movies.list({ orderBy: { createdAt: 'desc' } }),
@@ -99,7 +122,6 @@ export default function AdminDashboard({ user }: AdminDashboardProps) {
         genre: formData.genre,
         rating: formData.rating,
         duration: formData.duration,
-        userId: user.id,
         createdAt: editingItem?.createdAt || new Date().toISOString()
       }
 
@@ -188,12 +210,49 @@ export default function AdminDashboard({ user }: AdminDashboardProps) {
     'Sci-Fi', 'Fantasy', 'Romance', 'Documentary', 'Animation', 'Crime'
   ]
 
+  // Login screen
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Lock className="w-8 h-8 text-primary" />
+            </div>
+            <CardTitle className="text-2xl">Admin Access</CardTitle>
+            <CardDescription>
+              Enter the admin password to access the dashboard
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter admin password"
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full">
+                Access Dashboard
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navigation user={user} />
-        <div className="flex items-center justify-center h-96">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading dashboard...</p>
         </div>
       </div>
     )
@@ -201,12 +260,23 @@ export default function AdminDashboard({ user }: AdminDashboardProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation user={user} />
+      <div className="border-b">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-4">
+              <h1 className="text-xl font-bold text-primary">StreamFlix Admin</h1>
+            </div>
+            <Button variant="outline" onClick={handleLogout}>
+              Logout
+            </Button>
+          </div>
+        </div>
+      </div>
       
-      <div className="pt-20 pb-12">
+      <div className="py-8">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="mb-8">
-            <h1 className="text-3xl lg:text-4xl font-bold mb-2">Admin Dashboard</h1>
+            <h2 className="text-3xl lg:text-4xl font-bold mb-2">Admin Dashboard</h2>
             <p className="text-muted-foreground">Manage your streaming platform content</p>
           </div>
 

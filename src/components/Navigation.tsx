@@ -1,27 +1,10 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { createClient } from '@blinkdotnew/sdk'
-import { Search, Menu, User, LogOut, Settings } from 'lucide-react'
+import { Search, Menu } from 'lucide-react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from './ui/dropdown-menu'
 
-const blink = createClient({
-  projectId: 'movie-streaming-platform-dul9vz48',
-  authRequired: true
-})
-
-interface NavigationProps {
-  user: any
-}
-
-export default function Navigation({ user }: NavigationProps) {
+export default function Navigation() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isScrolled, setIsScrolled] = useState(false)
   const location = useLocation()
@@ -41,8 +24,6 @@ export default function Navigation({ user }: NavigationProps) {
       window.location.href = `/browse/search?q=${encodeURIComponent(searchQuery)}`
     }
   }
-
-  const isAdmin = user?.email?.includes('admin') || user?.email?.includes('streamflix')
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -81,21 +62,10 @@ export default function Navigation({ user }: NavigationProps) {
             >
               TV Shows
             </Link>
-            {isAdmin && (
-              <Link 
-                to="/admin" 
-                className={`text-sm font-medium transition-colors hover:text-primary ${
-                  location.pathname === '/admin' ? 'text-primary' : 'text-foreground'
-                }`}
-              >
-                Admin
-              </Link>
-            )}
           </div>
 
-          {/* Search and User Menu */}
+          {/* Search */}
           <div className="flex items-center space-x-4">
-            {/* Search */}
             <form onSubmit={handleSearch} className="hidden sm:block">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -108,33 +78,6 @@ export default function Navigation({ user }: NavigationProps) {
                 />
               </div>
             </form>
-
-            {/* User Menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="relative">
-                  <User className="w-5 h-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <div className="px-2 py-1.5 text-sm font-medium">
-                  {user?.email}
-                </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Settings className="w-4 h-4 mr-2" />
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  onClick={() => blink.auth.logout()}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
 
             {/* Mobile Menu */}
             <Button variant="ghost" size="sm" className="md:hidden">

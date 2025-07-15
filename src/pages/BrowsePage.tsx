@@ -16,14 +16,10 @@ import {
 
 const blink = createClient({
   projectId: 'movie-streaming-platform-dul9vz48',
-  authRequired: true
+  authRequired: false
 })
 
-interface BrowsePageProps {
-  user: any
-}
-
-export default function BrowsePage({ user }: BrowsePageProps) {
+export default function BrowsePage() {
   const { type } = useParams()
   const [searchParams] = useSearchParams()
   const searchQuery = searchParams.get('q') || ''
@@ -126,7 +122,7 @@ export default function BrowsePage({ user }: BrowsePageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navigation user={user} />
+      <Navigation />
       
       <div className="pt-20 pb-12">
         <div className="container mx-auto px-4 lg:px-8">

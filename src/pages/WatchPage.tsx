@@ -7,14 +7,10 @@ import { Slider } from '../components/ui/slider'
 
 const blink = createClient({
   projectId: 'movie-streaming-platform-dul9vz48',
-  authRequired: true
+  authRequired: false
 })
 
-interface WatchPageProps {
-  user: any
-}
-
-export default function WatchPage({ user }: WatchPageProps) {
+export default function WatchPage() {
   const { id } = useParams()
   const [content, setContent] = useState<any>(null)
   const [loading, setLoading] = useState(true)
