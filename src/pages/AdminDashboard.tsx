@@ -122,8 +122,11 @@ export default function AdminDashboard() {
         genre: formData.genre,
         rating: formData.rating,
         duration: formData.duration,
+        userId: 'admin', // Add required user_id field
         createdAt: editingItem?.createdAt || new Date().toISOString()
       }
+
+      console.log('Attempting to save content:', contentData)
 
       if (editingItem) {
         // Update existing content
@@ -150,7 +153,8 @@ export default function AdminDashboard() {
       loadContent()
     } catch (error) {
       console.error('Error saving content:', error)
-      toast.error('Failed to save content')
+      console.error('Error details:', JSON.stringify(error, null, 2))
+      toast.error(`Failed to save content: ${error.message || 'Unknown error'}`)
     }
   }
 
